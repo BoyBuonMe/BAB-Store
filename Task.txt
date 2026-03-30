@@ -1,2 +1,8 @@
 1. Làm schedule backup DB.
 2. Làm AI OpenClaw.
+
+MYSQLDATABASE=railway
+MYSQLHOST=mysql.railway.internal
+MYSQLPORT=juyahIDgKqobFvpiRwevnzJtFcXKBCOF
+MYSQLPASS=3306
+MYSQLUSER=root
