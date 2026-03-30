@@ -20,11 +20,11 @@ import Unisex from "@/pages/Unisex";
 import WomenPerfume from "@/pages/WomenPerfume";
 import RequireAdmin from "@/utils/requireAdmin";
 import ScrollToTop from "@/utils/scrollToTop";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { HashRouter, Route, Routes } from "react-router";
 
 export default function AppRoutes() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ScrollToTop />
       <Routes>
         <Route element={<AuthLayouts />}>
@@ -53,6 +53,6 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

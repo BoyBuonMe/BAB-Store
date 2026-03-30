@@ -18,4 +18,5 @@ export default defineConfig({
       "@": path.resolve("./src"),
     },
   },
+  base: '/BAB-Store/',
 })
