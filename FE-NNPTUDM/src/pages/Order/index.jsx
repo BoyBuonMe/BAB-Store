@@ -171,7 +171,7 @@ export default function Order() {
                           <div className="h-[90px] w-full overflow-hidden rounded-xl bg-[var(--muted)] sm:w-[90px]">
                             {item.imageUrl ? (
                               <img
-                                src={`${import.meta.env.VITE_BASE_API}${item.imageUrl}`}
+                                src={`${import.meta.env.VITE_BASE_URL_IMAGE}${item.imageUrl}`}
                                 alt={item.productName}
                                 className="h-full w-full object-cover"
                               />

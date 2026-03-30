@@ -153,7 +153,7 @@ export default function Products() {
                 <div className="flex flex-col lg:flex-row">
                   <div className="relative h-44 w-full overflow-hidden bg-gray-100 dark:bg-gray-800 sm:h-52 lg:w-64">
                     <img
-                      src={`${import.meta.env.VITE_BASE_API}${image}`}
+                      src={`${import.meta.env.VITE_BASE_URL_IMAGE}${image}`}
                       alt={product?.name}
                       className="h-full w-full object-contain p-3"
                     />

@@ -149,7 +149,7 @@ export default function ProductDetail() {
         <div className="bg-gray-50 p-4 lg:p-5">
           <div className="w-full aspect-square rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm">
             <img
-              src={`${import.meta.env.VITE_BASE_API}${product?.images?.[0]?.url}`}
+              src={`${import.meta.env.VITE_BASE_URL_IMAGE}${product?.images?.[0]?.url}`}
               alt={product?.name}
               className="w-full h-full object-cover hover:scale-105 transition duration-500"
             />
