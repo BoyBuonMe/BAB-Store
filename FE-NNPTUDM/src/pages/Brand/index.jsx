@@ -72,7 +72,7 @@ export default function BrandPage() {
             <div className="product-card-image-wrap relative h-56 sm:h-64 md:h-72 lg:h-80">
               <div className="product-card-image-bg" />
               <img
-                src={`http://127.0.0.1:3001/${product?.images?.[0]?.url}`}
+                src={`${import.meta.env.VITE_BASE_API}/${product?.images?.[0]?.url}`}
                 alt={product.name}
                 className="product-card-image h-full w-full object-cover"
               />

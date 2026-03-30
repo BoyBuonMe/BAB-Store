@@ -243,7 +243,7 @@ export default function Checkout() {
                 const product = item?.product;
                 const variant = item?.productVariant;
                 const imageUrl = product?.images?.[0]?.url
-                  ? `http://127.0.0.1:3001/${product.images[0].url}`
+                  ? `${import.meta.env.VITE_BASE_API}/${product.images[0].url}`
                   : "/default-product.png";
 
                 return (
