@@ -89,7 +89,7 @@ const adminService = {
           name: String(name).trim(),
           description: description ? String(description).trim() : null,
           production: Number(production),
-          brandId: BigInt(brand.id),
+          brandId: brand.id,
           categoryId: Number(category.id),
 
           images: {
@@ -126,7 +126,7 @@ const adminService = {
   updateProduct: async (id, { name, description, production, brand, category, productImages, productVariants }) => {
     // Check tồn tại product
     const existingProduct = await prisma.product.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: id },
     });
 
     if (!existingProduct) {
@@ -138,13 +138,13 @@ const adminService = {
     // Update
     const updatedProduct = await prisma.product.update({
       where: {
-        id: BigInt(id),
+        id: id,
       },
       data: {
         name: name ? String(name).trim() : undefined,
         description: description !== undefined ? (description ? String(description).trim() : null) : undefined,
         production: production !== undefined ? Number(production) : undefined,
-        brandId: brand ? BigInt(brand.id) : undefined,
+        brandId: brand ? brand.id : undefined,
         categoryId: category ? Number(category.id) : undefined,
 
         images: {
@@ -156,7 +156,7 @@ const adminService = {
 
         variants: {
           update: productVariants.map((variant) => ({
-            where: { id: BigInt(variant.id) },
+            where: { id: variant.id },
             data: {
               capacity: Number(variant.size.replace("ml", "").trim()),
               price: variant.price.toString(),
@@ -173,7 +173,7 @@ const adminService = {
   deleteProduct: async (id) => {
     // Check tồn tại
     const existingProduct = await prisma.product.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: id },
     });
 
     if (!existingProduct) {
@@ -185,7 +185,7 @@ const adminService = {
     // Xóa
     await prisma.product.delete({
       where: {
-        id: BigInt(id),
+        id: id,
       },
     });
 
@@ -196,7 +196,7 @@ const adminService = {
 
   // User
   updateUser: async (userId, payload) => {
-    const id = BigInt(userId);
+    const id = userId;
 
     const existingUser = await prisma.user.findUnique({
       where: { id },
@@ -272,7 +272,7 @@ const adminService = {
   deleteUser: async (id) => {
     // Kiểm tra tồn tại
     const existingUser = await prisma.user.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: id },
     });
 
     if (!existingUser) {
@@ -281,7 +281,7 @@ const adminService = {
       throw err;
     }
 
-    const userId = BigInt(id);
+    const userId = id;
 
     // Xóa dữ liệu liên quan trước
     await prisma.refreshToken.deleteMany({

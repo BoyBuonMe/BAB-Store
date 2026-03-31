@@ -4,6 +4,7 @@ const addToCartController = async (req, res, next) => {
   
   try {
     const userId = req.auth.user.id;
+    
     const { productVariantId, quantity } = req.body;
 
     const result = await cartService.addToCart({

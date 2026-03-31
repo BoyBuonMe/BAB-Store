@@ -3,6 +3,8 @@ const orderService = require("@/services/order.service");
 async function createOrderController(req, res) {
   try {
     const userId = req.auth.user.id;
+    console.log(typeof userId);
+    
     const payload = req.body;
 
     const order = await orderService.createOrderService(userId, payload);

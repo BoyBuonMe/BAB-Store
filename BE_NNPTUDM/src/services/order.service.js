@@ -11,6 +11,9 @@ const orderService = {
   createOrderService: async (userId, payload) => {
     const { items, shippingAddress, paymentMethod, totalQuantity, totalAmount, shippingFee, grandTotal } = payload;
 
+    console.log(items);
+    console.log(userId);
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       throw new Error("Không có sản phẩm để thanh toán");
     }
@@ -38,7 +41,7 @@ const orderService = {
       for (const item of items) {
         const variant = await tx.productVariant.findUnique({
           where: {
-            id: BigInt(item.productVariantId),
+            id: item.productVariantId,
           },
           select: {
             id: true,
@@ -59,7 +62,7 @@ const orderService = {
       const order = await tx.order.create({
         data: {
           orderCode,
-          userId: BigInt(userId),
+          userId: userId,
           totalQuantity: Number(totalQuantity),
           totalAmount: totalAmount.toString(),
           shippingFee: shippingFee.toString(),
@@ -71,9 +74,9 @@ const orderService = {
 
           orderItems: {
             create: items.map((item) => ({
-              cartItemId: BigInt(item.cartItemId),
-              productId: BigInt(item.productId),
-              productVariantId: BigInt(item.productVariantId),
+              cartItemId: item.cartItemId,
+              productId: item.productId,
+              productVariantId: item.productVariantId,
               productName: item.productName.toString(),
               quantity: Number(item.quantity),
               price: item.price.toString(),
@@ -109,7 +112,7 @@ const orderService = {
   getMyOrdersService: async (userId) => {
     const orders = await prisma.order.findMany({
       where: {
-        userId: BigInt(userId),
+        userId: userId,
       },
       include: {
         orderItems: true,
@@ -125,8 +128,8 @@ const orderService = {
   getMyOrderDetailService: async (userId, orderId) => {
     const order = await prisma.order.findFirst({
       where: {
-        id: BigInt(orderId),
-        userId: BigInt(userId),
+        id: orderId,
+        userId: userId,
       },
       include: {
         orderItems: true,

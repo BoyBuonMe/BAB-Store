@@ -18,8 +18,6 @@ class Pagination {
 
         orderBy: orderBy,
       });
-
-      console.log("123");
       
 
       const total = await service.model.count({

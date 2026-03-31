@@ -17,8 +17,8 @@ const cartService = {
       throw new Error("Quantity must be greater than 0");
     }
 
-    const parsedUserId = BigInt(userId);
-    const parsedVariantId = BigInt(productVariantId);
+    const parsedUserId = userId;
+    const parsedVariantId = productVariantId;
 
     const result = await prisma.$transaction(async (tx) => {
       const variant = await tx.productVariant.findUnique({
@@ -218,8 +218,8 @@ const cartService = {
       throw new Error("Quantity must be greater than 0");
     }
 
-    const parsedUserId = BigInt(userId);
-    const parsedCartItemId = BigInt(cartItemId);
+    const parsedUserId = userId;
+    const parsedCartItemId = cartItemId;
 
     const result = await prisma.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
@@ -276,8 +276,8 @@ const cartService = {
   },
 
   removeCartItem: async ({ userId, cartItemId }) => {
-    const parsedUserId = BigInt(userId);
-    const parsedCartItemId = BigInt(cartItemId);
+    const parsedUserId = userId;
+    const parsedCartItemId = cartItemId;
 
     const result = await prisma.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
