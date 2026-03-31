@@ -161,7 +161,7 @@ const cartService = {
   },
 
   getMyCart: async (userId) => {
-    const parsedUserId = BigInt(userId);
+    const parsedUserId = userId;
 
     const cart = await prisma.cart.findUnique({
       where: {

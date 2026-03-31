@@ -1,8 +1,9 @@
 1. Làm schedule backup DB.
 2. Làm AI OpenClaw.
 
+DATABASE_URL=mysql://root:juyahIDgKqobFvpiRwevnzJtFcXKBCOF@crossover.proxy.rlwy.net:45472/railway
 MYSQLDATABASE=railway
-MYSQLHOST=mysql.railway.internal
-MYSQLPORT=juyahIDgKqobFvpiRwevnzJtFcXKBCOF
-MYSQLPASS=3306
+MYSQLHOST=crossover.proxy.rlwy.net
+MYSQLPORT=45472
+MYSQLPASS=juyahIDgKqobFvpiRwevnzJtFcXKBCOF
 MYSQLUSER=root

@@ -16,6 +16,7 @@ const getAllProducts = async (req, res) => {
     // const page = Number(req.query.page) || 1;
     // const limit = Number(req.query.limit) || 6;
     const result = await productService.findAllProducts();
+    
     res.success(result)
   } catch (error) {
     res.error(error);
