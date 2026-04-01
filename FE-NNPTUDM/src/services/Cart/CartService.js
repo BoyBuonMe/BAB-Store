@@ -25,6 +25,8 @@ export const getMyCart = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await http.get("cart/my-cart");
+      console.log(response);
+      
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data);

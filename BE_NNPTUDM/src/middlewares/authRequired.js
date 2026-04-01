@@ -15,7 +15,7 @@ async function authRequired(req, res, next) {
     return res.unauthorized();
   }
 
-  const userId = payload.sub;
+  const userId = BigInt(payload.sub);
   const user = await authService.getUserById(userId);
   if (!user) return res.unauthorized();
 

@@ -1,5 +1,6 @@
 1. Làm schedule backup DB.
 2. Làm AI OpenClaw.
+3. Thử sửa lại useId của cart.service (Log xem thử nó đang có type gì, nếu bigint thì thử viết code cắt nó thành Int)
 
 DATABASE_URL=mysql://root:juyahIDgKqobFvpiRwevnzJtFcXKBCOF@crossover.proxy.rlwy.net:45472/railway
 MYSQLDATABASE=railway

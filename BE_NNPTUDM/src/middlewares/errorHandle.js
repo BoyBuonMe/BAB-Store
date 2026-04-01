@@ -11,6 +11,7 @@ function errorHandle(error, req, res, next) {
 
   if (isProduction()) {
     // Write error log...
+    console.error("[ERROR]", error);
     return res.error("Server error.", 500);
   }
 
