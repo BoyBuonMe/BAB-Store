@@ -1,4 +1,5 @@
 const adminService = require("@/services/admin.service");
+const { httpCodes } = require("@/config/constants");
 
 // Product
 const createProductController = async (req, res) => {
@@ -204,4 +205,85 @@ const deleteUserController = async (req, res, next) => {
   }
 };
 
-module.exports = { createProductController, updateProductController, deleteProductController, getAllProducts, getAllUsers, getAllQuantity, updateUserController, deleteUserController };
+const getOrdersController = async (req, res) => {
+  try {
+    const { status, page, limit, search } = req.query;
+    const data = await adminService.getOrders({
+      status,
+      page,
+      limit,
+      search,
+    });
+    return res.success({
+      message: "Lấy danh sách đơn hàng thành công",
+      data,
+    });
+  } catch (error) {
+    return res.error(
+      { message: error.message || "Không lấy được danh sách đơn hàng" },
+      httpCodes.internalServerError,
+    );
+  }
+};
+
+const getOrderDetailController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await adminService.getOrderDetail(id);
+    return res.success({
+      message: "Lấy chi tiết đơn hàng thành công",
+      data: order,
+    });
+  } catch (error) {
+    if (error.code === "ORDER_NOT_FOUND" || error.code === "INVALID_ORDER_ID") {
+      return res.error(
+        { message: error.code === "ORDER_NOT_FOUND" ? "Không tìm thấy đơn hàng" : "Mã đơn hàng không hợp lệ" },
+        httpCodes.notFound,
+      );
+    }
+    return res.error(
+      { message: error.message || "Không lấy được chi tiết đơn hàng" },
+      httpCodes.internalServerError,
+    );
+  }
+};
+
+const updateOrderStatusController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const order = await adminService.updateOrderStatus(id, status);
+    return res.success({
+      message: "Cập nhật trạng thái đơn hàng thành công",
+      data: order,
+    });
+  } catch (error) {
+    if (error.code === "ORDER_NOT_FOUND" || error.code === "INVALID_ORDER_ID") {
+      return res.error(
+        { message: error.code === "ORDER_NOT_FOUND" ? "Không tìm thấy đơn hàng" : "Mã đơn hàng không hợp lệ" },
+        httpCodes.notFound,
+      );
+    }
+    if (error.code === "INVALID_STATUS" || error.code === "INVALID_TRANSITION") {
+      return res.error({ message: error.message }, httpCodes.badRequest);
+    }
+    return res.error(
+      { message: error.message || "Không cập nhật được trạng thái đơn hàng" },
+      httpCodes.internalServerError,
+    );
+  }
+};
+
+module.exports = {
+  createProductController,
+  updateProductController,
+  deleteProductController,
+  getAllProducts,
+  getAllUsers,
+  getAllQuantity,
+  updateUserController,
+  deleteUserController,
+  getOrdersController,
+  getOrderDetailController,
+  updateOrderStatusController,
+};

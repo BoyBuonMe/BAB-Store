@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   Package,
+  ShoppingBag,
   TicketPercent,
   Image as ImageIcon,
   Boxes,
@@ -19,6 +20,7 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
 
   const menuItems = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "home" },
+    { name: "Orders", icon: <ShoppingBag size={20} />, path: "orders" },
     { name: "Users", icon: <Users size={20} />, path: "users" },
     { name: "Products", icon: <Package size={20} />, path: "products" },
     { name: "Vouchers", icon: <TicketPercent size={20} />, path: "vouchers" },

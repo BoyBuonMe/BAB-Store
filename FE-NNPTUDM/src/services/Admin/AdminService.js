@@ -53,3 +53,21 @@ export const deleteProduct = async (id) => {
     throw error?.response?.data || error;
   }
 }
+
+/** @param {{ page?: number; limit?: number; status?: string; search?: string }} params */
+export const getAdminOrders = async (params = {}) => {
+  const sp = new URLSearchParams();
+  sp.set("page", String(params.page ?? 1));
+  sp.set("limit", String(params.limit ?? 10));
+  if (params.status) sp.set("status", params.status);
+  if (params.search) sp.set("search", params.search);
+  return http.get(`admin/orders?${sp.toString()}`);
+};
+
+export const getAdminOrderDetail = async (id) => {
+  return http.get(`admin/orders/${id}`);
+};
+
+export const patchAdminOrderStatus = async (id, status) => {
+  return http.patch(`admin/orders/${id}/status`, { status });
+};

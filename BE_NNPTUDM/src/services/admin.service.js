@@ -1,6 +1,22 @@
 const prisma = require("@/libs/prisma");
 // const paginationService = require("@/utils/pagination");
 
+function serializeBigInt(data) {
+  return JSON.parse(
+    JSON.stringify(data, (_, value) => (typeof value === "bigint" ? value.toString() : value)),
+  );
+}
+
+const ORDER_STATUSES = ["PENDING", "CONFIRMED", "SHIPPING", "DELIVERED", "CANCELLED"];
+
+const ALLOWED_STATUS_TRANSITIONS = {
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["SHIPPING", "CANCELLED"],
+  SHIPPING: ["DELIVERED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
 const adminService = {
   // CRUD
   findBrand: async (brandName) => {
@@ -300,6 +316,147 @@ const adminService = {
     return {
       message: "Xóa người dùng thành công",
     };
+  },
+
+  getOrders: async ({ status, page, limit, search }) => {
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {};
+
+    if (status && ORDER_STATUSES.includes(String(status).toUpperCase())) {
+      where.status = String(status).toUpperCase();
+    }
+
+    if (search && String(search).trim()) {
+      where.orderCode = {
+        contains: String(search).trim(),
+      };
+    }
+
+    const [orders, totalItems] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        skip,
+        take: limitNum,
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / limitNum));
+
+    return serializeBigInt({
+      orders,
+      totalPages,
+      currentPage: pageNum,
+      totalItems,
+    });
+  },
+
+  getOrderDetail: async (id) => {
+    let orderId;
+    try {
+      orderId = BigInt(id);
+    } catch {
+      const err = new Error("INVALID_ORDER_ID");
+      err.code = "INVALID_ORDER_ID";
+      throw err;
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderItems: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      const err = new Error("ORDER_NOT_FOUND");
+      err.code = "ORDER_NOT_FOUND";
+      throw err;
+    }
+
+    return serializeBigInt(order);
+  },
+
+  updateOrderStatus: async (id, newStatus) => {
+    const normalized = String(newStatus || "").toUpperCase();
+    if (!ORDER_STATUSES.includes(normalized)) {
+      const err = new Error("Trạng thái không hợp lệ");
+      err.code = "INVALID_STATUS";
+      throw err;
+    }
+
+    let orderId;
+    try {
+      orderId = BigInt(id);
+    } catch {
+      const err = new Error("INVALID_ORDER_ID");
+      err.code = "INVALID_ORDER_ID";
+      throw err;
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      const err = new Error("ORDER_NOT_FOUND");
+      err.code = "ORDER_NOT_FOUND";
+      throw err;
+    }
+
+    const current = order.status;
+    const allowed = ALLOWED_STATUS_TRANSITIONS[current] || [];
+
+    if (allowed.length === 0) {
+      const err = new Error(`Không thể thay đổi trạng thái đơn ở trạng thái "${current}"`);
+      err.code = "INVALID_TRANSITION";
+      throw err;
+    }
+
+    if (!allowed.includes(normalized)) {
+      const err = new Error(
+        `Chỉ được chuyển từ ${current} sang: ${allowed.join(", ")}`,
+      );
+      err.code = "INVALID_TRANSITION";
+      throw err;
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: normalized },
+      include: {
+        orderItems: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return serializeBigInt(updated);
   },
 };
 

@@ -24,6 +24,7 @@ import { logout as logoutApi } from "@/services/Auth/AuthService";
 import SmartNavLink from "@/components/SmartNavLink";
 import { logout } from "@/features/Auth/AuthSlice";
 import { toast } from "sonner";
+import { getMyCart } from "@/services/Cart/CartService";
 
 export default function Header({ isHome, isDark, onToggleTheme }) {
   const dispatch = useDispatch();
@@ -40,6 +41,8 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
   const user = useSelector((state) => state.auth.user);
   const cart = useSelector((state) => state.cart.cart);
 
+  const isAdmin = user?.role === "ADMIN";
+
   const cartCount = cart?.items?.length || 0;
 
   const handleLogout = async () => {
@@ -53,6 +56,7 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
       localStorage.removeItem("user");
       toast.success("Đăng xuất thành công");
       dispatch(logout());
+      dispatch(getMyCart())
       setMobileOpen(false);
     }
   };
@@ -131,6 +135,10 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
           <nav className="hidden lg:flex items-center gap-7 xl:gap-9 text-sm">
             <SmartNavLink to="/" className="header-nav-link">
               Trang chủ
+            </SmartNavLink>
+
+            <SmartNavLink to="/blog" className="header-nav-link">
+              Blog
             </SmartNavLink>
 
             <HoverCard openDelay={50} closeDelay={80}>
@@ -281,6 +289,14 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
                     >
                       Đơn hàng
                     </SmartNavLink>
+                    {isAdmin && (
+                      <SmartNavLink
+                        to="/admin/home"
+                        className="header-dropdown-link cursor-pointer text-luxury-gold"
+                      >
+                        Quản trị
+                      </SmartNavLink>
+                    )}
                     <button
                       className="header-dropdown-link cursor-pointer text-red-500 text-left"
                       onClick={handleLogout}
@@ -348,6 +364,13 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
             onClick={() => setMobileOpen(false)}
           >
             Trang chủ
+          </SmartNavLink>
+          <SmartNavLink
+            to="/blog"
+            className="px-3 py-3 rounded-lg text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+            onClick={() => setMobileOpen(false)}
+          >
+            Blog
           </SmartNavLink>
 
           {/* Bộ sưu tập — accordion */}
@@ -452,6 +475,15 @@ export default function Header({ isHome, isDark, onToggleTheme }) {
               >
                 Đơn hàng
               </SmartNavLink>
+              {isAdmin && (
+                <SmartNavLink
+                  to="/admin/home"
+                  className="px-3 py-2.5 rounded-lg text-sm text-luxury-gold hover:bg-[var(--muted)] transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Quản trị
+                </SmartNavLink>
+              )}
               <button
                 className="px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors text-left w-full"
                 onClick={handleLogout}

@@ -9,7 +9,7 @@ function generateOrderCode() {
 
 const orderService = {
   createOrderService: async (userId, payload) => {
-    const { items, shippingAddress, paymentMethod, totalQuantity, totalAmount, shippingFee, grandTotal } = payload;
+    const { items, shippingAddress, paymentMethod, totalQuantity, totalAmount, shippingFee, grandTotal, status } = payload;
 
     console.log(items);
     console.log(userId);
@@ -71,6 +71,7 @@ const orderService = {
           addressLine: shippingAddress.addressLine.trim(),
           ward: shippingAddress.ward.trim(),
           city: shippingAddress.city.trim(),
+          status: status || undefined,
 
           orderItems: {
             create: items.map((item) => ({

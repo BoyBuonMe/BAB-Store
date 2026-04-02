@@ -32,9 +32,10 @@ export default function DefaultLayout() {
   const isCheckout = location.pathname.startsWith("/checkout");
   const isProfile = location.pathname.startsWith("/profile");
   const isOrder = location.pathname.startsWith("/orders");
+  const isBlog = location.pathname.startsWith("/blog");
 
   const shouldHideLayoutExtras =
-    isHome || isProductDetail || isCart || isCheckout || isProfile || isOrder;
+    isHome || isProductDetail || isCart || isCheckout || isProfile || isOrder || isBlog;
 
   const user = useSelector((state) => state.auth.user);
   const isValidUser = (user) => !!user?.id;

@@ -90,6 +90,13 @@ export default function AdminHeader({ setSidebarOpen, darkMode, setDarkMode }) {
                   <p className="font-medium">{user.name}</p>
 
                   <SmartNavLink
+                    to="/"
+                    className="header-dropdown-link cursor-pointer"
+                  >
+                    Về trang chủ
+                  </SmartNavLink>
+
+                  <SmartNavLink
                     to="/profile"
                     className="header-dropdown-link cursor-pointer"
                   >
@@ -114,18 +121,6 @@ export default function AdminHeader({ setSidebarOpen, darkMode, setDarkMode }) {
             </HoverCard>
           </div>
         </div>
-
-        {/* <div className="relative w-full max-w-md">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Tìm user, product, voucher..."
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-gray-700 dark:bg-gray-800 dark:focus:ring-indigo-900"
-          />
-        </div> */}
       </div>
     </header>
   );

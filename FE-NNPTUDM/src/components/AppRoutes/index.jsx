@@ -2,11 +2,14 @@ import AdminLayout from "@/layouts/AdminLayouts";
 import AuthLayouts from "@/layouts/AuthLayouts";
 import DefaultLayout from "@/layouts/DefaultLayouts";
 import AdminHome from "@/pages/Admin/AdminHome";
+import AdminOrders from "@/pages/Admin/AdminOrders";
 import Products from "@/pages/Admin/Products";
 import User from "@/pages/Admin/User";
 import UserDetail from "@/pages/Admin/UserDetail";
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
+import BlogPage from "@/pages/Blog";
+import BlogDetail from "@/pages/BlogDetail";
 import BrandPage from "@/pages/Brand";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
@@ -33,6 +36,8 @@ export default function AppRoutes() {
         </Route>
         <Route path="/" element={<DefaultLayout />}>
           <Route index element={<Home />}></Route>
+          <Route path="blog" element={<BlogPage />} />
+          <Route path="blog/:id" element={<BlogDetail />} />
           <Route path="men-perfume" element={<MenPerfume />}></Route>
           <Route path="women-perfume" element={<WomenPerfume />}></Route>
           <Route path="unisex-perfume" element={<Unisex />}></Route>
@@ -47,6 +52,7 @@ export default function AppRoutes() {
         <Route element={<RequireAdmin />}>
           <Route path="admin" element={<AdminLayout />}>
             <Route path="home" element={<AdminHome />} />
+            <Route path="orders" element={<AdminOrders />} />
             <Route path="users" element={<User />} />
             <Route path="users/:id" element={<UserDetail />} />
             <Route path="products" element={<Products />} />

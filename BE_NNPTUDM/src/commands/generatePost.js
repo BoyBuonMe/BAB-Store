@@ -1,118 +1,163 @@
 require("dotenv").config();
 require("module-alias/register");
-const { Output } = require("ai");
-const { z } = require("zod");
-const readingTime = require("reading-time");
-
-const aiService = require("@/services/ai.service");
+const axios = require("axios");
 const prisma = require("@/libs/prisma");
-const slugify = require("@/utils/slugify");
 
-async function main() {
-  const idea = await prisma.postIdea.findFirst({
-    where: {
-      status: "pending",
+async function getRandomImage() {
+  const keywords = ["perfume", "fragrance", "cologne", "scent", "luxury perfume"];
+  const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+
+  const response = await axios.get("https://api.unsplash.com/photos/random", {
+    params: {
+      query: randomKeyword,
+      orientation: "landscape",
     },
-    orderBy: {
-      id: "asc",
+    headers: {
+      Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
     },
   });
-  if (!idea) {
-    return console.log("No idea");
-  }
 
-  const prompt = `
-    Bạn hãy viết một bài blog chuyên môn chia sẻ kiến thức lập trình dành cho đối tượng người mới bắt đầu hoàn toàn. Bài viết phải tuân thủ nghiêm ngặt các tiêu chí sau:
+  return response.data.urls.regular; // URL ảnh chất lượng tốt
+}
+
+async function generatePost(idea) {
+  const prompt = `Bạn hãy viết một bài blog chuyên sâu về nước hoa và mùi hương dành cho độc giả Việt Nam. Bài viết phải tuân thủ nghiêm ngặt các tiêu chí sau:
 
     Thông tin đầu vào:
       - Chủ đề bài viết (Title): ${idea.title}
-      - Mục tiêu và phạm vi (Description):  ${idea.description}
+      - Mục tiêu và phạm vi (Description): ${idea.description}
 
     Cấu trúc và yêu cầu bài viết:
 
       Tiêu đề và mở đầu:
-        - Tạo title/hook hấp dẫn từ title đã cho. Tuyệt đối không dùng Title Case (ví dụ: "Hàm Trong Python" là sai, "Hàm trong python" mới đúng). Chỉ viết hoa chữ cái đầu câu và danh từ riêng.
-        - Viết một đoạn mở bài khoảng 200-300 từ. Giới thiệu chủ đề một cách thân thiện, giải thích tại sao nó quan trọng với người mới, và mô tả ngắn gọn những gì độc giả sẽ học được.
+        - Tạo title/hook hấp dẫn từ title đã cho. Tuyệt đối không dùng Title Case kiểu tiếng Anh cho mọi chữ. Chỉ viết hoa chữ cái đầu câu và danh từ riêng nếu có.
+        - Viết một đoạn mở bài khoảng 200-300 từ. Giới thiệu chủ đề một cách thân thiện, giải thích tại sao nó quan trọng với người yêu nước hoa, và mô tả ngắn gọn những gì độc giả sẽ học được.
 
       Nội dung chính:
-        - Nội dung khoảng 800 - 1000 từ, chia thành 4 đến 5 phần lớn với các tiêu đề con (dùng heading H2, H3). Cấu trúc đi từ khái niệm cơ bản, đến ví dụ minh họa, rồi ứng dụng thực tế.
-        - Văn phong: Dùng ngôi "mình" hoặc "tôi" (đảm bảo đồng nhất trong cả bài chỉ dùng 1 ngôi), giọng văn gần gũi, khuyến khích. Giải thích mọi khái niệm từ gốc, coi như người đọc chưa biết gì. Ưu tiên dùng đoạn văn ngắn (3-4 câu).
-        - Giải thích kiến thức: Với mỗi khái niệm quan trọng, phải có: (a) Định nghĩa đơn giản bằng tiếng Việt, (b) Một ví dụ so sánh (analogy) từ đời sống, và (c) Một ví dụ mã code hoặc tình huống cụ thể.
-        - Ví dụ minh họa: Mỗi ví dụ code phải ngắn gọn, tập trung vào một ý. Code phải có comment giải thích từng bước bằng tiếng Việt và phần kết quả mong đợi (output). Nên có cả ví dụ đúng và ví dụ sai thường gặp.
-        - Hình ảnh mô tả: Với các bước hoặc khái niệm phức tạp, hãy mô tả bằng lời một hình ảnh hoặc sơ đồ nên có (ví dụ: "Hãy tưởng tượng một sơ đồ với các hộp nối tiếp nhau...") để người đọc dễ hình dung.
+        - Nội dung khoảng 800 - 1000 từ, chia thành 4 đến 5 phần lớn với các tiêu đề con (dùng heading H2, H3). Cấu trúc đi từ khái niệm cơ bản (ví dụ: hương đầu/giữa/cuối, độ lưu hương, độ tỏa), đến gợi ý chọn nước hoa theo mùa/phong cách/dịp sử dụng, rồi mẹo thực tế (bảo quản, xịt đúng cách, layering nhẹ nhàng nếu phù hợp).
+        - Văn phong: Dùng ngôi "mình" hoặc "tôi" (đồng nhất trong cả bài), gần gũi, tôn trọng độc giả. Tránh biệt ngữ quá hàn lâm nếu không giải thích.
+        - Với mỗi khái niệm quan trọng: (a) Định nghĩa đơn giản bằng tiếng Việt, (b) Một ví dụ so sánh từ đời thường, (c) Gợi ý áp dụng thực tế.
+        - Không bắt buộc có đoạn code. Nếu nhắc đến thành phần hương, hãy mô tả bằng ngôn ngữ dễ hiểu.
 
       Kết bài:
-        - Tóm tắt ngắn gọn 3-5 điểm chính quan trọng nhất.
-        - Đề xuất một bước thực hành nhỏ hoặc một bài tập độc giả có thể tự làm ngay.
+        - Tóm tắt ngắn gọn 3-5 điểm chính.
+        - Đề xuất một hành động nhỏ độc giả có thể làm ngay.
 
       Quy tắc bắt buộc về hình thức:
-        - Tránh lạm dụng thuật ngữ khó hiểu cho người mới
-        - Tránh có câu văn không tự nhiên theo cách nửa Anh nửa Việt (chấp nhận những trường hợp phổ biến)
-        - Tuyệt đối không sử dụng bất kỳ emoji hay ký tự đặc biệt trang trí nào (như ⭐, ✅, 🚀, ---).
-        - Thay vì dùng "→", hãy dùng "->"; thay vì "–", hãy dùng "-"
-        - Chỉ sử dụng các định dạng văn bản cơ bản: in đậm, in nghiêng, danh sách gạch đầu dòng, và code block.
-        - Trong toàn bộ bài viết, cố ý tạo ra các lỗi đánh máy ngẫu nhiên với tỉ lệ khoảng 3%. Các lỗi này phải là lỗi thông thường, không làm thay đổi nghĩa câu và người đọc dễ dàng hiểu được từ đúng (ví dụ: "kiến thức" thành "kiến thức", "thực hành" thành "thực hàn", "quan trọng" thành "quan trọn"). Tuyệt đối không tạo ra từ phản cảm hoặc tục tĩu.
-        - Mục tiêu cuối cùng: Bài viết phải khiến một người hoàn toàn mới hiểu được chủ đề [Title], cảm thấy tự tin để thử nghiệm, và biết bước tiếp theo cần làm gì.  
-  
-      Quy tắc BẮT BUỘC về format đầu ra:
-        - Đầu ra chỉ bao gồm JSON có định dạng sau: {
-          "title: "<title/hook chuẩn SEO, hấp dẫn, thu hút độc giả>",
-          "description: "<mô tả bài viết chuẩn SEO, thu hút độc giả, tạo tò mò, ...>",
-          "content: "<Nội dung chính, định dạng markdown>",
-          "thumb_prompt": "<Prompt mô tả để tạo thumbnail phù hợp cho bài viết, style (text, color, size, ...) hiện đại, phù hợp với nội dung. Trong prompt nêu rõ tạo thumbnail cho bài viết có tiêu đề là gì. Kích thước ảnh 400x224>"
+        - Tránh lạm dụng thuật ngữ tiếng Anh không giải thích
+        - Tuyệt đối không sử dụng emoji hay ký tự trang trí (như ⭐, ✅, 🚀, ---).
+        - Thay "->" thay vì mũi tên đặc biệt nếu cần
+        - Chỉ dùng định dạng markdown cơ bản: in đậm, in nghiêng, danh sách, heading.
+        - Cố ý tạo lỗi đánh máy ngẫu nhiên khoảng 3%.
+
+      Quy tắc BẮT BUỘC về format đầu ra (JSON hợp lệ):
+        {
+          "title": "<title/hook chuẩn SEO, hấp dẫn>",
+          "description": "<mô tả ngắn SEO, tạo tò mò>",
+          "content": "<Nội dung chính, định dạng markdown>",
+          "thumb_prompt": "<Prompt mô tả ảnh thumbnail 400x224, phong cách hiện đại, liên quan nước hoa và chủ đề bài, ghi rõ tiêu đề bài>"
         }
-  `;
-  console.log({ prompt });
+        Trả về chính xác một object JSON, không markdown bọc ngoài, không giải thích thêm.`;
 
-  const output = Output.object({
-    schema: z.object({
-      title: z.string(),
-      description: z.string(),
-      content: z.string(),
-      thumb_prompt: z.string(),
-    }),
-  });
-  const response = await aiService.generateText("anthropic/claude-sonnet-4.5", prompt, output);
-  const result = JSON.parse(response);
-
-  console.log({ result });
-
-  // Generate thumb
-  const thumbnailPath = await aiService.generateImage(result.thumb_prompt, "posts");
-
-  // Create post
-  const post = await prisma.post.create({
-    data: {
-      userId: 17,
-      postIdeaId: idea.id,
-      title: result.title,
-      slug: slugify(result.title, {
-        replacement: "-",
-        lower: true,
-        locale: "vi",
-        trim: true,
-      }),
-      description: result.description,
-      content: result.content,
-      image: thumbnailPath,
-      minRead: readingTime(result.content).minutes,
-      publishedAt: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const aiResponse = await axios.post(
+    "https://openapi.huydarealest.dev/v1/chat/completions",
+    {
+      model: "codex-5",
+      messages: [{ role: "user", content: prompt }],
     },
-  });
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.AI_API_KEY}`,
+      },
+    }
+  );
 
-  console.log({ post });
+  const rawContent = aiResponse.data.choices[0].message.content;
+  const cleaned = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
+  return JSON.parse(cleaned);
+}
 
-  // Update idea status
-  await prisma.postIdea.update({
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-") + "-" + Date.now();
+}
+
+async function main() {
+  // Lấy các ideas chưa có post nào (posts rỗng)
+  const ideas = await prisma.postIdea.findMany({
     where: {
-      id: idea.id,
-    },
-    data: {
-      status: "completed",
+      status: "pending",
+      posts: { none: {} },
     },
   });
+
+  if (!ideas.length) {
+    console.log("⚠️  Không có idea nào ở trạng thái pending. Hãy chạy npm run ai trước.");
+    await prisma.$disconnect();
+    return;
+  }
+
+  console.log(`📝 Tìm thấy ${ideas.length} ideas, bắt đầu generate posts...\n`);
+
+  for (const idea of ideas) {
+    try {
+      console.log(`⏳ Đang generate: "${idea.title}"`);
+
+      const postData = await generatePost(idea);
+
+      const imageUrl = await getRandomImage();
+
+      await prisma.post.create({
+        data: {
+          userId: BigInt(4), // TODO: đổi thành userId thực tế
+          postIdeaId: idea.id,
+          title: postData.title,
+          description: postData.description,
+          slug: generateSlug(postData.title),
+          image: imageUrl,
+          content: postData.content,
+          minRead: Math.ceil(postData.content.split(" ").length / 200),
+        },
+      });
+      
+      // Cập nhật status idea -> done
+      await prisma.postIdea.update({
+        where: { id: idea.id },
+        data: { status: "done" },
+      });
+
+      console.log(`✅ Done: "${postData.title}"\n`);
+    } catch (err) {
+      console.error(`❌ Lỗi với idea "${idea.title}":`, err.message);
+      // Bỏ qua idea lỗi, tiếp tục idea kế tiếp
+    }
+  }
+
+  console.log("🎉 Hoàn tất generate tất cả posts!");
+  await prisma.$disconnect();
 }
 
 main();
+
+// require("dotenv").config();
+// require("module-alias/register");
+
+// const postService = require("@/services/post.service");
+
+// async function main() {
+//   const post = await postService.generateSinglePostFromNextPendingIdea();
+//   if (!post) {
+//     console.log("No pending post idea.");
+//     return;
+//   }
+//   console.log("Created post:", post);
+// }
+
+// main();

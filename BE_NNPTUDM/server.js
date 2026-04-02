@@ -2,6 +2,10 @@ require("dotenv").config();
 require("module-alias/register");
 require("./polyfill");
 
+// const cron = require("node-cron");
+// const weeklyBlogJob = require("@/tasks/weeklyBlog");
+const { startPublishSchedule } = require("@/schedules/publishPost.schedule");
+
 const express = require("express");
 const cors = require("cors");
 
@@ -28,4 +32,18 @@ app.use(errorHandle);
 
 app.listen(port, () => {
   console.log(`Demo app listening on port ${port}`);
+
+  startPublishSchedule();
+
+  // Mỗi tuần (thứ Hai 9:00 giờ VN): sinh 1 bài blog nước hoa nếu còn ý tưởng pending
+  // if (process.env.ENABLE_WEEKLY_BLOG_CRON !== "false") {
+  //   cron.schedule(
+  //     "0 9 * * 1",
+  //     () => {
+  //       weeklyBlogJob();
+  //     },
+  //     { timezone: "Asia/Ho_Chi_Minh" },
+  //   );
+  //   console.log("[cron] Weekly blog job scheduled: Monday 09:00 Asia/Ho_Chi_Minh");
+  // }
 });

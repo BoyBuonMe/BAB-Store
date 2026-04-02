@@ -21,4 +21,9 @@ router.get("/get-quantity", authRequired, adminRequired, adminController.getAllQ
 router.put("/update-user/:id", authRequired, adminRequired, adminController.updateUserController);
 router.delete("/delete-user", authRequired, adminRequired, adminController.deleteUserController);
 
+// ORDERS
+router.get("/orders", authRequired, adminRequired, adminController.getOrdersController);
+router.patch("/orders/:id/status", authRequired, adminRequired, adminController.updateOrderStatusController);
+router.get("/orders/:id", authRequired, adminRequired, adminController.getOrderDetailController);
+
 module.exports = router;

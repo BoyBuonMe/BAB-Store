@@ -2,9 +2,15 @@
 2. Làm AI OpenClaw.
 3. Thử sửa lại useId của cart.service (Log xem thử nó đang có type gì, nếu bigint thì thử viết code cắt nó thành Int)
 
-DATABASE_URL=mysql://root:juyahIDgKqobFvpiRwevnzJtFcXKBCOF@crossover.proxy.rlwy.net:45472/railway
-MYSQLDATABASE=railway
-MYSQLHOST=crossover.proxy.rlwy.net
-MYSQLPORT=45472
-MYSQLPASS=juyahIDgKqobFvpiRwevnzJtFcXKBCOF
-MYSQLUSER=root
+https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card
+Ngày mai vô link trên, add thẻ vô để chạy AI.
+
+
+# 1. Đổi DATABASE_URL sang Railway
+# 2. Chạy lần lượt
+npx prisma db push          # tạo bảng Post + PostIdea trên Railway
+npm run generate-post-ideas # sinh 100 ideas vào DB Railway
+npm run generate-post       # sinh 1 bài blog vào DB Railway
+
+# 3. Đổi DATABASE_URL về local
+# 4. Deploy lên production

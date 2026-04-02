@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { checkoutOrder } from "@/services/Order/OrderService";
 import { getMyCart } from "@/services/Cart/CartService";
+import http from "@/utils/http";
 import provincesData from "@/mocks/provinces.json";
 import wardsByCityData from "@/mocks/wards-by-city.json";
 // import { getMyCart } from "@/services/Cart/CartService"; // nếu bạn có action này thì bật lên
@@ -178,6 +179,19 @@ export default function Checkout() {
 
     try {
       setSubmitting(true);
+
+      if (paymentMethod === "momo") {
+        const resp = await http.post("payment/momo/create", {
+          amount: grandTotal,
+          orderPayload: payload,
+        });
+
+        const payUrl = resp?.payUrl || resp?.data?.payUrl;
+        if (!payUrl) throw new Error("Không nhận được payUrl từ MoMo");
+
+        window.location.href = payUrl;
+        return;
+      }
 
       await dispatch(checkoutOrder(payload)).unwrap();
 
