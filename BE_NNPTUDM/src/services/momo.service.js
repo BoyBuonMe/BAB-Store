@@ -213,6 +213,7 @@ const momoService = {
 
     await orderService.createOrderService(userId, payload);
     await removeCartItems(userId, payload.items);
+    dispatch(getMyCart());
 
     // tránh double-create khi MoMo retry IPN
     pendingOrders.delete(orderId);
